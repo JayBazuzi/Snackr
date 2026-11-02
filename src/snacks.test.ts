@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseSnacks, MAX_SNACKS, snackFor, walkMinutesBetween, type Place, type Snack } from "./snacks";
+import { chooseSnacks, snackFor, type Place, type Snack } from "./snacks";
 
 const ORIGIN = { lat: 40.6568, lon: -74.0077 };
 
@@ -26,18 +26,16 @@ describe("snackFor", () => {
     expect(snackFor(place(tags), ORIGIN)?.craving).toBe(craving);
   });
 
+  it("is at least a one minute walk", () => {
+    expect(snack({ shop: "bakery" }).walkMinutes).toBe(1);
+  });
+
+  it("estimates about 16 minutes to walk a kilometer", () => {
+    expect(snack({ shop: "bakery" }, 0.009).walkMinutes).toBe(16);
+  });
+
   it("skips places no rule understands", () => {
     expect(snackFor(place({ amenity: "restaurant", cuisine: "fine_dining" }), ORIGIN)).toBeNull();
-  });
-});
-
-describe("walkMinutesBetween", () => {
-  it("is at least one minute", () => {
-    expect(walkMinutesBetween(ORIGIN, ORIGIN)).toBe(1);
-  });
-
-  it("estimates about 16 minutes for a kilometer", () => {
-    expect(walkMinutesBetween(ORIGIN, { lat: ORIGIN.lat + 0.009, lon: ORIGIN.lon })).toBe(16);
   });
 });
 
@@ -61,7 +59,7 @@ describe("chooseSnacks", () => {
   it("keeps a surprise list varied when one craving is closest", () => {
     const manySweets = Array.from({ length: 12 }, (_, index) => snack({ shop: "bakery" }, index * 0.0001));
     const chosen = chooseSnacks([...manySweets, pizza], { craving: null, price: null, sort: "closest" });
-    expect(chosen).toHaveLength(MAX_SNACKS);
+    expect(chosen).toHaveLength(10);
     expect(chosen).toContainEqual(pizza);
   });
 });

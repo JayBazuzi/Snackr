@@ -1,7 +1,7 @@
 export type Craving = "Sweet" | "Savory" | "Salty" | "Fresh" | "Cold";
 export const CRAVINGS: Craving[] = ["Sweet", "Savory", "Salty", "Fresh", "Cold"];
 export type PriceTier = 1 | 2 | 3;
-export const MAX_SNACKS = 10;
+const MAX_SNACKS = 10;
 
 export interface Position {
   lat: number;
@@ -70,7 +70,7 @@ function placeKinds(tags: Record<string, string>): string[] {
   return [tags.amenity, tags.shop, ...cuisines].filter((kind): kind is string => Boolean(kind));
 }
 
-export function walkMinutesBetween(from: Position, to: Position): number {
+function walkMinutesBetween(from: Position, to: Position): number {
   const metersPerDegree = 111320;
   const north = (to.lat - from.lat) * metersPerDegree;
   const east = (to.lon - from.lon) * metersPerDegree * Math.cos((from.lat * Math.PI) / 180);
