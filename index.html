@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Snackr</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍿</text></svg>"
+    />
+  </head>
+  <body>
+    <main>
+      <h1>🍿 Snackr</h1>
+      <div class="location">
+        <span>📍 <span id="location">Finding your location…</span></span>
+        <form id="place-form">
+          <input id="place" aria-label="Search another place" placeholder="Or type a place" />
+          <button type="submit">Go</button>
+        </form>
+      </div>
+      <div class="controls">
+        <div class="chips" id="craving"></div>
+        <div class="refine">
+          For
+          <select id="price" aria-label="Price">
+            <option value="">any price</option>
+            <option value="1">$</option>
+            <option value="2">$$</option>
+            <option value="3">$$$</option></select
+          >,
+          <select id="sort" aria-label="Sort">
+            <option value="closest">closest</option>
+            <option value="cheapest">cheapest</option>
+          </select>
+          first
+        </div>
+      </div>
+      <p id="status" role="status"></p>
+      <ul id="snacks"></ul>
+      <p class="note">
+        Places and hours come from
+        <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>. Snack ideas and prices are
+        guesses based on the type of place, not menus. Walk times are estimates. $ is under $5, $$ is $5–10, $$$ is over
+        $10.
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
