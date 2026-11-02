@@ -11,16 +11,23 @@ function clockTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).replace(":00", "");
 }
 
-export function describeHours(value: string | undefined, now: Date): Hours {
-  if (!value) return NOT_LISTED;
+function parseHours(value: string): OpeningHours | null {
   try {
-    const hours = new OpeningHours(value);
-    if (hours.getUnknown(now)) return NOT_LISTED;
-    const openNow = hours.getState(now);
-    const change = hours.getNextChange(now);
-    if (openNow) return { openNow, label: change ? `Open until ${clockTime(change)}` : "Open 24 hours" };
-    return { openNow, label: "Closed now" };
+    return new OpeningHours(value);
   } catch {
-    return NOT_LISTED; // OpenStreetMap hours are hand-written, and some don't parse.
+    return null; // OpenStreetMap hours are hand-written, and some don't parse.
   }
+}
+
+function openLabel(hours: OpeningHours, now: Date): string {
+  const closing = hours.getNextChange(now);
+  return closing ? `Open until ${clockTime(closing)}` : "Open 24 hours";
+}
+
+export function describeHours(value: string | undefined, now: Date): Hours {
+  const hours = value ? parseHours(value) : null;
+  if (!hours || hours.getUnknown(now)) return NOT_LISTED;
+  return hours.getState(now)
+    ? { openNow: true, label: openLabel(hours, now) }
+    : { openNow: false, label: "Closed now" };
 }
