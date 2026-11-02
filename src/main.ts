@@ -5,6 +5,7 @@ import {
   CRAVINGS,
   snackFor,
   type Craving,
+  type Place,
   type Position,
   type PriceTier,
   type Snack,
@@ -42,20 +43,23 @@ function element(tag: string, className: string, text: string): HTMLElement {
   return node;
 }
 
-function snackItem(snack: OpenSnack): HTMLElement {
-  const { lat, lon, name } = snack.place;
+function directionsLink({ lat, lon, name }: Place): HTMLAnchorElement {
   const link = document.createElement("a");
   link.className = "place";
   link.textContent = name;
   link.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=walking`;
   link.target = "_blank";
   link.rel = "noopener";
+  return link;
+}
+
+function snackItem(snack: OpenSnack): HTMLElement {
   const facts = [`${snack.walkMinutes} min walk`, "$".repeat(snack.price), snack.craving, snack.hours.label];
   const item = document.createElement("li");
   item.append(
     element("div", "icon", snack.icon),
     element("div", "idea", snack.idea),
-    link,
+    directionsLink(snack.place),
     element("div", "facts", facts.join(" · ")),
   );
   return item;
@@ -78,6 +82,17 @@ function renderCravingChips(): void {
   });
 }
 
+async function openSnacksNear(origin: Position): Promise<OpenSnack[]> {
+  const now = new Date();
+  const places = await fetchPlaces(origin);
+  return places
+    .flatMap((place) => {
+      const snack = snackFor(place, origin);
+      return snack ? [{ ...snack, hours: describeHours(place.tags.opening_hours, now) }] : [];
+    })
+    .filter((snack) => snack.hours.openNow !== false);
+}
+
 async function loadSnacks(getOrigin: () => Promise<Position>, label: string): Promise<void> {
   snacksLoaded = false;
   snackList.replaceChildren();
@@ -85,13 +100,7 @@ async function loadSnacks(getOrigin: () => Promise<Position>, label: string): Pr
   try {
     const origin = await getOrigin();
     locationLabel.textContent = label;
-    const now = new Date();
-    snacks = (await fetchPlaces(origin))
-      .flatMap((place) => {
-        const snack = snackFor(place, origin);
-        return snack ? [{ ...snack, hours: describeHours(place.tags.opening_hours, now) }] : [];
-      })
-      .filter((snack) => snack.hours.openNow !== false);
+    snacks = await openSnacksNear(origin);
     snacksLoaded = true;
     renderSnacks();
   } catch (error) {
