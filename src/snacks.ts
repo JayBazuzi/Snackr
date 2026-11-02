@@ -38,8 +38,7 @@ interface SnackRule {
   price: PriceTier;
 }
 
-// First match wins, so specific kinds of place come before general ones.
-const RULES: SnackRule[] = [
+const RULES_MOST_SPECIFIC_FIRST: SnackRule[] = [
   {
     matches: ["ice_cream", "frozen_yogurt", "gelato"],
     icon: "🍨",
@@ -79,10 +78,9 @@ function walkMinutesBetween(from: Position, to: Position): number {
   return Math.max(1, Math.round((Math.hypot(north, east) * streetDetour) / metersPerMinute));
 }
 
-// Places no rule understands return null, so the app never invents an idea for them.
 export function snackFor(place: Place, origin: Position): Snack | null {
   const kinds = placeKinds(place.tags);
-  const rule = RULES.find((candidate) => candidate.matches.some((match) => kinds.includes(match)));
+  const rule = RULES_MOST_SPECIFIC_FIRST.find((candidate) => candidate.matches.some((match) => kinds.includes(match)));
   if (!rule) return null;
   const { icon, idea, craving, price } = rule;
   return { icon, idea, craving, price, place, walkMinutes: walkMinutesBetween(origin, place) };
@@ -94,8 +92,7 @@ function comparator(sort: SortOrder): (a: Snack, b: Snack) => number {
     : (a, b) => a.price - b.price || a.walkMinutes - b.walkMinutes;
 }
 
-// Takes the closest of each craving in turn, so a list of "anything" stays varied.
-function varied(snacks: Snack[]): Snack[] {
+function closestOfEachCravingInTurn(snacks: Snack[]): Snack[] {
   const closest = comparator("closest");
   const queues = CRAVINGS.map((craving) => snacks.filter((snack) => snack.craving === craving).sort(closest));
   const picks: Snack[] = [];
@@ -111,6 +108,8 @@ function varied(snacks: Snack[]): Snack[] {
 export function chooseSnacks(snacks: Snack[], selection: Selection): Snack[] {
   const affordable = snacks.filter((snack) => selection.price === null || snack.price === selection.price);
   const chosen =
-    selection.craving === null ? varied(affordable) : affordable.filter((snack) => snack.craving === selection.craving);
+    selection.craving === null
+      ? closestOfEachCravingInTurn(affordable)
+      : affordable.filter((snack) => snack.craving === selection.craving);
   return [...chosen].sort(comparator(selection.sort)).slice(0, MAX_SNACKS);
 }
