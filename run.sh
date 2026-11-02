@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+[ -d node_modules ] || npm ci
+npm run dev -- --open
