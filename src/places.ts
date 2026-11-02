@@ -17,7 +17,7 @@ interface OverpassElement {
   tags?: Record<string, string>;
 }
 
-export function overpassQuery({ lat, lon }: Position): string {
+function overpassQuery({ lat, lon }: Position): string {
   const around = `(around:${SEARCH_METERS},${lat},${lon})`;
   return `[out:json][timeout:20];(
     nwr["amenity"~"^(${AMENITIES})$"]["name"]${around};
@@ -25,7 +25,7 @@ export function overpassQuery({ lat, lon }: Position): string {
   );out center 200;`;
 }
 
-export function toPlaces(elements: OverpassElement[]): Place[] {
+function toPlaces(elements: OverpassElement[]): Place[] {
   return elements.flatMap(({ lat, lon, center, tags }) => {
     const position = lat !== undefined && lon !== undefined ? { lat, lon } : center;
     return position && tags?.name ? [{ ...position, name: tags.name, tags }] : [];
