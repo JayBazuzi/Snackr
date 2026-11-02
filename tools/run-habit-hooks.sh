@@ -40,4 +40,6 @@ if [ "$#" -eq 1 ] && [ -f "$1" ]; then
 fi
 
 cd "$REPO_ROOT"
+# eslint and knip are dev dependencies of this repo.
+export PATH="$REPO_ROOT/node_modules/.bin:$PATH"
 exec habit-hooks "$@"

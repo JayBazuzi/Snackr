@@ -1,0 +1,9 @@
+{
+  "path": ["src"],
+  "format": ["typescript"],
+  "ignore": ["**/dist/**", "**/node_modules/**"],
+  "mode": "weak",
+  "threshold": 0,
+  "minLines": 5,
+  "minTokens": 50
+}
